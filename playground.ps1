@@ -88,6 +88,8 @@ $endpoints = Get-MidiEndpointDeviceInfoList
 # Select endpoint 
 $selectedEndpoint = $endpoints[-1]
 
+
+$session = Start-MidiSession "Powershell Demo Session"
 $connection = Open-MidiEndpointConnection $session $selectedEndpoint.EndpointDeviceId
 
 $eventHandlerAction = {
@@ -111,3 +113,16 @@ do {
 Get-Job | Stop-Job
 Get-Job | Remove-Job
 #endregion
+
+
+-and ($r.WordsHex -match '00$')
+do {
+    # get the output from our background job
+    $r = Receive-Job -Job $job
+    if ($r.MessageTypeHasChannelField) {
+        if (($r.MessageType.ToString() -like "Midi*Voice32") -and ($r.WordsHex -match '00$')) {
+            $key = $r.WordsHex -replace '^\d{4}', '' -replace '\d{2}$', ''
+            Send-VirtualKeyboard -key "0x$key"
+        }
+    }
+} until ([System.Console]::KeyAvailable)

@@ -45,4 +45,3 @@ Function Play-MidiNote {
     Write-Verbose $o
     Send-MidiMessage $connection ($offMessage, 0x02000000) -Timestamp 0
 }
-}
