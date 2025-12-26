@@ -9,15 +9,16 @@ Get-MidiEndpointDeviceInfo $endpointDeviceId
 $session = Start-MidiSession "Powershell Demo Session"
 $connection = Open-MidiEndpointConnection $session $endpointDeviceId
 
-
 <#
-(0x40905364, 0x02001111)
+(0x40915364, 0x02001111)
 0x
     4 = Midi channel voice message
     0 = group
-    90 = note on - 80 = note off
-    53 = note number (C, D, E etc)
-    64 = ??Attribute type???? 0x03 = pitch _OR_ is it velocity?
+    9 = note on - 8 = note off
+    1 = Midi channel
+    5364 = index
+        53 = note number (C, D, E etc)
+        64 = Attribute type
 
 0x
     0200 = MIDI 2.0 velocity, range 0x0000 to 0xFFFF
@@ -26,7 +27,8 @@ $connection = Open-MidiEndpointConnection $session $endpointDeviceId
 
 MIDI 1.0 package - 0x25971234
 #>
-$messages = (0x40905364, 0x02001111), (0x40805364, 0x02000000)#, (0x40904664, 0x02001111), (0x40804664, 0x02000000), (0x40904864, 0x02001111), (0x40804864, 0x02000000)
+
+$messages = (0x40903c52, 0x02001111), (0x40803c52, 0x02000000)#, (0x40904664, 0x02001111), (0x40804664, 0x02000000), (0x40904864, 0x02001111), (0x40804864, 0x02000000)
 
 foreach ($message in $messages) {
     Send-MidiMessage $connection $message -Timestamp 0
