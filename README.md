@@ -4,7 +4,9 @@ Midi 2.0 is coming to Windows 11 - and you can read all about that [here](https:
 
 This is my playground for things and stuff with Midi 2.0.
 
-Eventually this will be a module for fun/dumb/use(full|less) things to do with Midi in PowerShell. It is surprisingly fun.
+~~Eventually this will be a module for fun/dumb/use(full|less) things to do with Midi in PowerShell. It is surprisingly fun.~~
+
+Module can be found [here](https://github.com/bjompen/PSMidi)
 
 ## Useful links
 
