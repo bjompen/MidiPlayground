@@ -114,7 +114,6 @@ do {
 
 Get-Job | Stop-Job
 Get-Job | Remove-Job
-#endregion
 
 
 -and ($r.WordsHex -match '00$')
@@ -128,3 +127,52 @@ do {
         }
     }
 } until ([System.Console]::KeyAvailable)
+#endregion
+
+
+#region Superconnection
+
+
+function New-PSMidiEndpointConnectionList {
+    [CmdletBinding()]
+    param ()
+
+    #TODO: Check if Start-Midi is run, if not, do it. Maybe do this in the module psm1?
+    $PSMidiSession = Start-MidiSession -Name 'PSMidiSession'
+    $edi = Get-MidiEndpointDeviceInfoList
+    $connectionList = @{}
+    foreach ($endpoint in $edi) {
+        $connection = Open-MidiEndpointConnection -Session $PSMidiSession -EndpointDeviceId $endpoint.EndpointDeviceId
+        $connectionList.Add($endpoint.Name, $connection)
+    }
+    $connectionList
+}
+#endregion
+
+
+#region clock
+# https://microsoft.github.io/MIDI/sdk-reference/MidiClock/
+
+[Microsoft.Windows.Devices.Midi2.MidiClock] | gm -s
+[Microsoft.Windows.Devices.Midi2.MidiClock]::TimestampFrequency
+[Microsoft.Windows.Devices.Midi2.MidiClock]::TimestampConstantSendImmediately
+[Microsoft.Windows.Devices.Midi2.MidiClock]::TimestampConstantMessageQueueMaximumFutureTicks
+[Microsoft.Windows.Devices.Midi2.MidiClock]::Now
+[Microsoft.Windows.Devices.Midi2.MidiClock]::ConvertTimestampTicksToMicroseconds
+[Microsoft.Windows.Devices.Midi2.MidiClock]::ConvertTimestampTicksToMicroseconds([Microsoft.Windows.Devices.Midi2.MidiClock]::Now)
+[Microsoft.Windows.Devices.Midi2.MidiClock]::ConvertTimestampTicksToseconds([Microsoft.Windows.Devices.Midi2.MidiClock]::Now)
+[Microsoft.Windows.Devices.Midi2.MidiClock]::OffsetTimestampByMicroseconds
+[Microsoft.Windows.Devices.Midi2.MidiClock]::OffsetTimestampBySeconds([Microsoft.Windows.Devices.Midi2.MidiClock]::Now, 10)
+[Microsoft.Windows.Devices.Midi2.MidiClock]::Now ; [Microsoft.Windows.Devices.Midi2.MidiClock]::OffsetTimestampBySeconds([Microsoft.Windows.Devices.Midi2.MidiClock]::Now, 10)
+
+
+# Räkna ut bpm, sätt trigger, till rätt värde, script ska ha ett kösystem.
+$testTimer = {
+    param($a, $b)
+    Write-Host "Tid: $($b.SignalTime)"
+}
+$te = [System.Timers.Timer]::new(2000)
+$te.AutoReset = $true
+Register-ObjectEvent -InputObject $te -EventName Elapsed -SourceIdentifier 'Timer' -Action $testTimer
+$te.Start()
+$te.Stop
