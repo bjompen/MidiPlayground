@@ -167,12 +167,58 @@ function New-PSMidiEndpointConnectionList {
 
 
 # Räkna ut bpm, sätt trigger, till rätt värde, script ska ha ett kösystem.
-$testTimer = {
-    param($a, $b)
-    Write-Host "Tid: $($b.SignalTime)"
+#TODO: Rula en bättre timer m.h.a midiclock
+class BPM {
+    [double] $MilliSeconds
+    [int] $BPM
+    hidden [System.Timers.Timer] $timer
+    hidden [string] $eventSourceIdentifier
+
+    BPM([double] $MilliSeconds) {
+        $this.MilliSeconds = $MilliSeconds
+        $this.BPM = [math]::Round(60000 / $MilliSeconds)
+    }
+
+    BPM([int] $BPM) {
+        $this.MilliSeconds = [math]::Round(60000 / $BPM)
+        $this.BPM = $BPM
+    }
+
+    StartTimer([scriptblock] $ScriptBlock) {
+        $this.timer = [System.Timers.Timer]::new($this.MilliSeconds)
+        $this.timer.AutoReset = $true
+        $this.eventSourceIdentifier = "BPM timer event $((New-Guid).Guid.Replace('-', '').Substring(0,6))"
+        Register-ObjectEvent -InputObject $this.timer -EventName Elapsed -SourceIdentifier $this.eventSourceIdentifier -Action $ScriptBlock
+        $this.timer.Start()
+    }
+
+    StopTimer() {
+        $this.timer.Stop()
+        Unregister-Event -SourceIdentifier $this.eventSourceIdentifier
+    }
 }
-$te = [System.Timers.Timer]::new(2000)
-$te.AutoReset = $true
-Register-ObjectEvent -InputObject $te -EventName Elapsed -SourceIdentifier 'Timer' -Action $testTimer
-$te.Start()
-$te.Stop
+
+
+$testTimer = {
+    [int]$totalBeats++
+    [int]$currentBeat++
+    if ($totalBeats -le 2) {
+        $s = [System.Diagnostics.Stopwatch]::new()
+    }
+    # Write-Host "Current beat: $CurrentBeat"
+    # Write-Host "Total beats: $TotalBeats"
+    Write-Host "Delay $($s.Elapsed.TotalMilliseconds)"
+    Write-Host "Total beats: $TotalBeats"
+    if ($s.Elapsed.TotalMilliseconds -ge 1000) {
+    }
+    $s.Restart()
+    if ($CurrentBeat -eq 4) {
+        $CurrentBeat = 0
+    }
+}
+
+$chordList = [System.Collections.Generic.Queue[chord]]::new()
+$chordList.Enqueue([chord]::new('C3'))
+$chordList.Enqueue([chord]::new('D4'))
+$chordList.Enqueue([chord]::new('E1'))
+$chordList.Enqueue([chord]::new('Fb2'))
