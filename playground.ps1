@@ -166,56 +166,27 @@ function New-PSMidiEndpointConnectionList {
 [Microsoft.Windows.Devices.Midi2.MidiClock]::Now ; [Microsoft.Windows.Devices.Midi2.MidiClock]::OffsetTimestampBySeconds([Microsoft.Windows.Devices.Midi2.MidiClock]::Now, 10)
 
 
-# Räkna ut bpm, sätt trigger, till rätt värde, script ska ha ett kösystem.
-#TODO: Rula en bättre timer m.h.a midiclock
-class BPM {
-    [double] $MilliSeconds
-    [int] $BPM
-    hidden [System.Timers.Timer] $timer
-    hidden [string] $eventSourceIdentifier
 
-    BPM([double] $MilliSeconds) {
-        $this.MilliSeconds = $MilliSeconds
-        $this.BPM = [math]::Round(60000 / $MilliSeconds)
-    }
-
-    BPM([int] $BPM) {
-        $this.MilliSeconds = [math]::Round(60000 / $BPM)
-        $this.BPM = $BPM
-    }
-
-    StartTimer([scriptblock] $ScriptBlock) {
-        $this.timer = [System.Timers.Timer]::new($this.MilliSeconds)
-        $this.timer.AutoReset = $true
-        $this.eventSourceIdentifier = "BPM timer event $((New-Guid).Guid.Replace('-', '').Substring(0,6))"
-        Register-ObjectEvent -InputObject $this.timer -EventName Elapsed -SourceIdentifier $this.eventSourceIdentifier -Action $ScriptBlock
-        $this.timer.Start()
-    }
-
-    StopTimer() {
-        $this.timer.Stop()
-        Unregister-Event -SourceIdentifier $this.eventSourceIdentifier
-    }
-}
+#TODO: script ska ha ett kösystem.
 
 
 $testTimer = {
-    [int]$totalBeats++
-    [int]$currentBeat++
+    $null = [int]$totalBeats++
+    $null = [int]$currentBeat++
     if ($totalBeats -le 2) {
         $s = [System.Diagnostics.Stopwatch]::new()
     }
-    # Write-Host "Current beat: $CurrentBeat"
-    # Write-Host "Total beats: $TotalBeats"
-    Write-Host "Delay $($s.Elapsed.TotalMilliseconds)"
-    Write-Host "Total beats: $TotalBeats"
-    if ($s.Elapsed.TotalMilliseconds -ge 1000) {
-    }
+    Write-Output "Current beat: $CurrentBeat"
+    Write-Output "Total beats: $TotalBeats"
+    Write-Output "Delay $($s.Elapsed.TotalMilliseconds)"
     $s.Restart()
     if ($CurrentBeat -eq 4) {
         $CurrentBeat = 0
     }
 }
+
+Start-Metronome -BPM 60 -ScriptBlock $testTimer
+
 
 $chordList = [System.Collections.Generic.Queue[chord]]::new()
 $chordList.Enqueue([chord]::new('C3'))
