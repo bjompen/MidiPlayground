@@ -193,3 +193,15 @@ $chordList.Enqueue([chord]::new('C3'))
 $chordList.Enqueue([chord]::new('D4'))
 $chordList.Enqueue([chord]::new('E1'))
 $chordList.Enqueue([chord]::new('Fb2'))
+
+
+
+## Kösystem!
+
+$q = [System.Collections.Generic.PriorityQueue[object, int]]::new()
+$s = Get-Service
+$s | % { $q.Enqueue($_.Name, (Get-Random -Minimum 1 -Maximum 100)) }
+$q.Dequeue()
+$q.enqueue('a', 1)
+$q.Dequeue()
+$q.Dequeue()
