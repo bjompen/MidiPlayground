@@ -188,20 +188,24 @@ $testTimer = {
 Start-Metronome -BPM 60 -ScriptBlock $testTimer
 
 
-$chordList = [System.Collections.Generic.Queue[chord]]::new()
-$chordList.Enqueue([chord]::new('C3'))
-$chordList.Enqueue([chord]::new('D4'))
-$chordList.Enqueue([chord]::new('E1'))
-$chordList.Enqueue([chord]::new('Fb2'))
+# $chordList = [System.Collections.Generic.Queue[chord]]::new()
+# $chordList.Enqueue([chord]::new('C3'))
+# $chordList.Enqueue([chord]::new('D4'))
+# $chordList.Enqueue([chord]::new('E1'))
+# $chordList.Enqueue([chord]::new('Fb2'))
 
 
 
-## Kösystem!
+# ## Kösystem!
 
-$q = [System.Collections.Generic.PriorityQueue[object, int]]::new()
-$s = Get-Service
-$s | % { $q.Enqueue($_.Name, (Get-Random -Minimum 1 -Maximum 100)) }
-$q.Dequeue()
-$q.enqueue('a', 1)
-$q.Dequeue()
-$q.Dequeue()
+# $q = [System.Collections.Generic.PriorityQueue[object, int]]::new()
+# $s = Get-Service
+# $s | % { $q.Enqueue($_.Name, (Get-Random -Minimum 1 -Maximum 100)) }
+# $q.Dequeue()
+# $q.enqueue('a', 1)
+# $q.Dequeue()
+# $q.Dequeue()
+
+# Use a linked list maybe?
+# https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.linkedlist-1?view=net-6.0
+# https://github.com/jstnryan/midi-dot-net/blob/master/Midi/MessageQueue.cs#L34
