@@ -209,3 +209,24 @@ Start-Metronome -BPM 60 -ScriptBlock $testTimer
 # Use a linked list maybe?
 # https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.linkedlist-1?view=net-6.0
 # https://github.com/jstnryan/midi-dot-net/blob/master/Midi/MessageQueue.cs#L34
+
+
+
+
+$script:MessageQueue = [System.Collections.Generic.Dictionary[int, string[]]]::new(10000)
+$script:MessageQueue.Add(10, 'plupp')
+$MessageQueue.Item(10) | ForEach-Object { 'blä' }
+
+$MessageQueue.Item(10)
+
+Start-ThreadJob -ScriptBlock {
+    $d = $using:MessageQueue
+    while ($true) {
+        "----$($d.Item(10))---"
+        start-sleep -Seconds 5
+    }
+}
+
+$MessageQueue[10] += 'ää'
+
+Get-Job | Receive-Job
