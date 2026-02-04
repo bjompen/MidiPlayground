@@ -9,6 +9,17 @@ Get-MidiEndpointDeviceInfo $endpointDeviceId
 $session = Start-MidiSession "Powershell Demo Session"
 $connection = Open-MidiEndpointConnection $session $endpointDeviceId
 
+
+
+$no = New-PSMidiMessage -Note C -Octave 1 -MessageStatus NoteOn
+$nf = New-PSMidiMessage -Note C -Octave 1 -MessageStatus NoteOff
+$sno = New-PSMidiMessage -Note D -Octave 1 -MessageStatus NoteOn
+$snf = New-PSMidiMessage -Note D -Octave 1 -MessageStatus NoteOff
+Add-PSMidiQueueMessage -Message $no -Every 1
+Add-PSMidiQueueMessage -Message $nf -Every 2
+Add-PSMidiQueueMessage -Message $sno -Every 3
+Add-PSMidiQueueMessage -Message $snf -Every 4
+
 <#
 (0x40915364, 0x02001111)
 0x
@@ -230,3 +241,79 @@ Start-ThreadJob -ScriptBlock {
 $MessageQueue[10] += 'ää'
 
 Get-Job | Receive-Job
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+############### Drums
+$no = New-PSMidiMessage -Note C -Octave 1 -MessageStatus NoteOn
+$nf = New-PSMidiMessage -Note C -Octave 1 -MessageStatus NoteOff
+$sno = New-PSMidiMessage -Note D -Octave 1 -MessageStatus NoteOn
+$snf = New-PSMidiMessage -Note D -Octave 1 -MessageStatus NoteOff
+
+Add-PSMidiQueueMessage -Message $no -Every 1
+Add-PSMidiQueueMessage -Message $nf -Every 1
+Add-PSMidiQueueMessage -Message $sno -Every 5
+Add-PSMidiQueueMessage -Message $snf -Every 5
+
+# Bass
+$BassCOn = New-PSMidiMessage -Note C -Octave 2 -MessageStatus NoteOn -MidiChannel 2
+$BassCOff = New-PSMidiMessage -Note C -Octave 2 -MessageStatus NoteOff -MidiChannel 2
+$BassAOn = New-PSMidiMessage -Note A -Octave 2 -MessageStatus NoteOn -MidiChannel 2
+$BassAOff = New-PSMidiMessage -Note A -Octave 2 -MessageStatus NoteOff -MidiChannel 2
+$BassDOn = New-PSMidiMessage -Note D -Octave 2 -MessageStatus NoteOn -MidiChannel 2
+$BassDOff = New-PSMidiMessage -Note D -Octave 2 -MessageStatus NoteOff -MidiChannel 2
+$BassGOn = New-PSMidiMessage -Note G -Octave 2 -MessageStatus NoteOn -MidiChannel 2
+$BassGOff = New-PSMidiMessage -Note G -Octave 2 -MessageStatus NoteOff -MidiChannel 2
+
+1..256 | % {
+    $r = $_ % 64
+    if ($r -in @(1..16)) {
+        if (($r % 2) -eq 1) {
+            Add-PSMidiQueueMessage -Message $BassCOn -OnTotalBeat $_
+        }
+        else {
+            Add-PSMidiQueueMessage -Message $BassCOff -OnTotalBeat $_
+        }
+    }
+    elseif ($r -in @(17..32)) {
+        if (($r % 2) -eq 1) {
+            Add-PSMidiQueueMessage -Message $BassAOn -OnTotalBeat $_
+        }
+        else {
+            Add-PSMidiQueueMessage -Message $BassAOff -OnTotalBeat $_
+        }
+    }
+    elseif ($r -in @(33..48)) {
+        if (($r % 2) -eq 1) {
+            Add-PSMidiQueueMessage -Message $BassDOn -OnTotalBeat $_
+        }
+        else {
+            Add-PSMidiQueueMessage -Message $BassDOff -OnTotalBeat $_
+        }
+    }
+    elseif (($r -in @(49..64)) -or ($r -eq 0)) {
+        if (($r % 2) -eq 1) {
+            Add-PSMidiQueueMessage -Message $BassGOn -OnTotalBeat $_
+        }
+        else {
+            Add-PSMidiQueueMessage -Message $BassGOff -OnTotalBeat $_
+        }
+    }
+}
+
+start-psMidiQueue -Tempo 360 -Beat 8 -Connection $connection -Verbose
