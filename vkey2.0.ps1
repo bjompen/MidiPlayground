@@ -3,6 +3,7 @@ $keybdSource = @"
 
 public class kbd
 {
+    [StructLayout(LayoutKind.Sequential)]
     public struct INPUT { 
             public int type; // 0 = INPUT_MOUSE
                             // 1 = INPUT_KEYBOARD
@@ -10,6 +11,7 @@ public class kbd
             public KEYBDINPUT ki;
         }
 
+    [StructLayout(LayoutKind.Sequential)]
     public struct KEYBDINPUT {
         public int      wVk;
         public int      wScan;
@@ -18,9 +20,37 @@ public class kbd
         public ulong       dwExtraInfo;
     }
 
-    [System.Runtime.InteropServices.DllImport("user32.dll")]
+    [System.Runtime.InteropServices.DllImport("user32.dll", SetLastError = true)]
     public static extern uint SendInput(int cInputs, INPUT[] pInputs, int cbSize);
 
+    // public static void SendKeyStroke(int wVk, int wScan, int dwFlags) 
+    public static void SendKeyStroke() 
+    {
+        INPUT[] input = new INPUT[4];
+
+        input[0].type = 1;
+        input[0].ki.wVk = 91;
+    
+        input[1].type = 1;
+        input[1].ki.wVk = 68;
+
+        input[2].type = 1;
+        input[2].ki.wVk = 68;
+        input[2].ki.dwFlags = 2;
+
+        input[3].type = 1;
+        input[3].ki.wVk = 91;
+        input[3].ki.dwFlags = 2;
+
+        uint uSent = SendInput(input.Length, input, System.Runtime.InteropServices.Marshal.SizeOf(input[0]));
+
+        if (uSent != input.Length)
+        {
+            System.Console.Write($"SendInput failed - uSent: {uSent}");
+            System.Console.Write("SendInput failed: ");
+            System.Console.WriteLine(System.Runtime.InteropServices.Marshal.GetLastWin32Error());
+        } 
+    }
 }
 "@
 
@@ -33,28 +63,6 @@ https://stackoverflow.com/questions/39353073/how-i-can-send-mouse-click-in-power
 
 #>
 
-<#
-Det här, fast för keyboard
-
-    public static void LeftClickAtPoint(int x, int y)
-    {
-        // Move the mouse
-        INPUT[] input = new INPUT[3];
-
-        input[0].mi.dx = x * (65535 / System.Windows.Forms.Screen.PrimaryScreen.Bounds.Width);
-        input[0].mi.dy = y * (65535 / System.Windows.Forms.Screen.PrimaryScreen.Bounds.Height);
-        input[0].mi.dwFlags = MOUSEEVENTF_MOVE | MOUSEEVENTF_ABSOLUTE;
-
-        // Left mouse button down
-        input[1].mi.dwFlags = MOUSEEVENTF_LEFTDOWN;
-
-        // Left mouse button up
-        input[2].mi.dwFlags = MOUSEEVENTF_LEFTUP;
-
-        SendInput(3, input, Marshal.SizeOf(input[0]));
-    }
-#>
-
 Add-Type -TypeDefinition $keybdSource
 
-[kbd]::doThing()
+[kbd]::sendKeyStroke()
