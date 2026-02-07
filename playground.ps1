@@ -317,3 +317,28 @@ $BassGOff = New-PSMidiMessage -Note G -Octave 2 -MessageStatus NoteOff -MidiChan
 }
 
 start-psMidiQueue -Tempo 360 -Beat 8 -Connection $connection -Verbose
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+############## Stupid keyboard trixxx
+34, 72, 101, 108, 108, 111, 32, 87, 111, 114, 108, 100, 34, 10 | % { 
+    SendVirtualKeyboard -IntIndex $_ 
+} # Hello World
+
+
+
+'A#0', 'C4', 'F6', 'C7', 'C7', 'D#7', 'G#0', 'D#5', 'D#7', 'F#7', 'C7', 'E6', 'A#0', 'A#-2' | % {
+    $m = New-PSMidiMessage -Note $($_ -replace '\d', '') -Octave $($_ -replace '\D', '')
+    Send-PSMidiMessage -Connection $connection -Message $m
+}
